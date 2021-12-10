@@ -1,11 +1,11 @@
 import requests
-import threading
 import schedule
 import datetime
 import time
+import getpass
 from bs4 import BeautifulSoup
 
-def login():
+def login(user_id, pw):
 
     url = 'https://dcid.dcinside.com/join/member_check.php'
 
@@ -20,8 +20,7 @@ def login():
     loginForm = soup.find('form', attrs={'id': 'login_process'})
     auth = loginForm.find_all('input', attrs = {'type':'hidden'})[2]
 
-    user_id = input("아이디 입력 : ")
-    pw = input("비밀번호 입력 : ")
+    
 
 
     login_data = {
@@ -47,6 +46,7 @@ def login():
 
 def logout(session: requests.Session):
     session.close()
+    print("Successfully logged out")
 
 
 def blocker(session: requests.Session):
@@ -83,19 +83,22 @@ def blocker(session: requests.Session):
         print(f"vpn 차단 : {post_data[texts[0]]//60} 시간")
         print(f"통신사 IP 차단 : {post_data[texts[1]]} 분")
 
-def run():
+def run(user_id, pw):
 
     now = datetime.datetime.now()
     print(now)
-    session = login()
+    session = login(user_id, pw)
     blocker(session)
     logout(session)
         
 if __name__ == "__main__":
 
-    schedule.every(59).minutes.do(run)
+    user_id = input("아이디 입력 : ")
+    pw = getpass.getpass("비밀번호 입력 : ")
 
-    run()
+    schedule.every(59).minutes.do(run, user_id, pw)
+
+    run(user_id, pw)
     while True:
         schedule.run_pending()
         time.sleep(10)
