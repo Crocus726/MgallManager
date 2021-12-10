@@ -33,11 +33,11 @@ def login(user_id, pw):
 
     response = session.post(url, data=login_data)
     if "history.back(-1);" in response.text:
-        print("Cannot create login session!")
+        print("Cannot create login session.")
         return 0
     
     else :
-        print("Login session created successfully")
+        print("Login session created successfully.")
 
         BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
         params = { 'id': 'pessimism',}
@@ -46,7 +46,7 @@ def login(user_id, pw):
 
 def logout(session: requests.Session):
     session.close()
-    print("Successfully logged out")
+    print("Successfully logged out.")
 
 
 def blocker(session: requests.Session):
@@ -80,8 +80,8 @@ def blocker(session: requests.Session):
     if "fail" in response.text:
         print("Cannot manage gallery settings.")
     elif "success" in response.text:
-        print(f"vpn 차단 : {post_data[texts[0]]//60} 시간")
-        print(f"통신사 IP 차단 : {post_data[texts[1]]} 분")
+        print(f"vpn 차단 : {post_data[texts[0]]//60}시간", end = ", ")
+        print(f"통신사 IP 차단 : {post_data[texts[1]]}분")
 
 def run(user_id, pw):
 
