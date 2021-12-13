@@ -1,4 +1,5 @@
 import requests
+from crawler import Crawler
 
 class Deleter:
 
