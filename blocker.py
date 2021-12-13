@@ -1,9 +1,4 @@
 import requests
-import schedule
-import datetime
-import time
-import getpass
-from auth import login, logout
 
 def blocker(session: requests.Session):
 
@@ -38,23 +33,3 @@ def blocker(session: requests.Session):
     elif "success" in response.text:
         print(f"vpn 차단 : {post_data[texts[0]]//60}시간", end = ", ")
         print(f"통신사 IP 차단 : {post_data[texts[1]]}분")
-
-def run(user_id, pw):
-
-    now = datetime.datetime.now()
-    print(now)
-    session = login(user_id, pw)
-    blocker(session)
-    logout(session)
-        
-if __name__ == "__main__":
-
-    user_id = input("아이디 입력 : ")
-    pw = getpass.getpass("비밀번호 입력 : ")
-
-    schedule.every(59).minutes.do(run, user_id, pw)
-
-    run(user_id, pw)
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
