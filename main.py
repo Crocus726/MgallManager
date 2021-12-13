@@ -4,13 +4,14 @@ import datetime
 import time
 import requests
 from auth import login, logout
-from blocker import blocker
+from blocker import Blocker
 
 def main(session: requests.Session, gall_id):
 
     now = datetime.datetime.now()
     print(now)
-    blocker(session, gall_id)
+    blocker = Blocker(session, gall_id)
+    blocker.block()
     logout(session)
 
 if __name__ == "__main__":

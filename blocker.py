@@ -1,46 +1,43 @@
 import requests
 
-class blocker:
-    def __init__():
-        pass
+class Blocker:
 
-
-def blocker(session: requests.Session, gall_id):
-
-    # 해당 갤러리로 이동
-    BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
-    params = {'id': gall_id }
-    response = session.get(BASE_URL, params=params)
-
-    post_data = {
-        "ci_t": session.cookies['ci_c'],
-        "gallery_id": gall_id,
-        "_GALLTYPE_": "M",
-        "proxy_time": 2880,
-        "mobile_time": 60,
-        "proxy_use": 1,
-        "mobile_use": 1,
-        "img_block_use": -1,
-        "img_block_time": None
-    }
-
-    texts = ["proxy_time", "mobile_time"]
-    if post_data["proxy_time"] > 0:
-            post_data["proxy_use"] = 1
-    else:
-        post_data["proxy_use"] = 0
-
-    if post_data["mobile_time"] > 0:
-        post_data["mobile_use"] = 1
-    else:
-        post_data["mobile_use"] = 0
-
-    url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
-    response = session.post(url, data=post_data)
-
-    if "success" in response.text:
-        print(f"vpn 차단 : {post_data[texts[0]]//60}시간", end = ", ")
-        print(f"통신사 IP 차단 : {post_data[texts[1]]}분")
+    def __init__(self, session: requests.Session, gall_id):
+        
+        self.session = session
+        self.gall_id = gall_id
+        self.post_data = {
+            "ci_t": None,
+            "gallery_id": self.gall_id,
+            "_GALLTYPE_": "M",
+            "proxy_time": 2880,
+            "mobile_time": 60,
+            "proxy_use": 1,
+            "mobile_use": 1,
+            "img_block_use": -1,
+            "img_block_time": None
+        }
     
-    else:
-        print("Cannot manage gallery settings.")
+    def set_post_data(self):
+
+        BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
+        params = {'id': self.gall_id }
+        self.session.get(BASE_URL, params=params)
+        self.post_data["ci_t"] = self.session.cookies['ci_c']
+
+    def block(self):
+        
+        self.set_post_data()
+        url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
+        response = self.session.post(url, data=self.post_data)
+
+        if "success" in response.text:
+
+            proxy_time = self.post_data["proxy_time"]//60
+            mobile_time = self.post_data["mobile_time"]
+
+            print(f"VPN 차단 : {proxy_time}시간", end = ", ")
+            print(f"통신사 IP 차단 : {mobile_time}분")
+    
+        else:
+            print("Cannot manage gallery settings.")
