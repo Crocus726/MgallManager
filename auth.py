@@ -31,8 +31,6 @@ def login(user_id, pw):
     
     else :
         print("Login session created successfully.")
-
-        
         return session
 
 def logout(session: requests.Session):
