@@ -1,4 +1,5 @@
 import requests
+import logging
 from crawler import Crawler
 
 class Deleter:
@@ -20,21 +21,28 @@ class Deleter:
         params = {'id': self.gall_id}
         self.session.get(BASE_URL, params=params)
         self.post_data["ci_t"] = self.session.cookies['ci_c']
-    
-    def get_posting_nums(self):
-        
-        # 닉네임이 Xxx인 유저의 글 번호를 받아와서 정수 리스트로 주면 됨.
-        self.post_data["nos[]"] = [21205, 21206]
 
+        crawler = Crawler(self.gall_id)
+        list = crawler.search_post_nums()
+        self.post_data["nos[]"] = list
 
     def delete(self):
-        
-        self.set_post_data()
-        self.get_posting_nums()
-        url = "https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_list"
-        response = self.session.post(url, data=self.post_data)
 
-        if "success" in response.text:
-            print("Deleted Selected Postings")
+        self.set_post_data()
+        logger = logging.getLogger()
+        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+        if len(self.post_data["nos[]"]) == 0:
+            return
+
         else:
-            print("Cannnot delete posts.")
+            url = "https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_list"
+            response = self.session.post(url, data=self.post_data)
+
+            if "success" in response.text:
+                logging.basicConfig(filename='deleter.log',level=logging.INFO, format = Log_Format)
+                logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]))
+                
+            else:
+                logging.basicConfig(filename='deleter.log',level=logging.WARNING, format = Log_Format)
+                logger.warning("Cannnot delete posts.")
+                

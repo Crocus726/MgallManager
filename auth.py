@@ -30,9 +30,7 @@ def login(user_id, pw):
         exit()
     
     else :
-        print("Login session created successfully.")
         return session
 
 def logout(session: requests.Session):
     session.close()
-    print("Successfully logged out.")
