@@ -1,26 +1,31 @@
+import sys
 import schedule
 import datetime
 import time
-import getpass
+import requests
 from auth import login, logout
 from blocker import blocker
 
-def main(user_id, pw):
+def main(session: requests.Session, gall_id):
 
     now = datetime.datetime.now()
     print(now)
-    session = login(user_id, pw)
-    blocker(session)
+    blocker(session, gall_id)
     logout(session)
 
 if __name__ == "__main__":
 
-    user_id = input("아이디 입력 : ")
-    pw = getpass.getpass("비밀번호 입력 : ")
+    gall_id = sys.argv[1]
+    user_id = sys.argv[2]
+    user_pw = sys.argv[3]
+   
+    session = login(user_id, user_pw)
+    if session == 0:
+        exit()
 
-    schedule.every(59).minutes.do(main, user_id, pw)
+    schedule.every(60).minutes.do(main, session, gall_id)
 
-    main(user_id, pw)
+    main(session, gall_id)
     while True:
         schedule.run_pending()
         time.sleep(10)
