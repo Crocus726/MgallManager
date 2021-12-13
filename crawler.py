@@ -26,14 +26,14 @@ class Crawler:
 
         for i in titles:
 
-            title = i.find('a').text
+            # title = i.find('a').text
             nick = i.find('td', class_ = "gall_writer ub-writer").text
             post_num = i.find('td', class_ = "gall_num").text
             
             if "♡" in nick :
                 post_num_list.append(int(post_num))
 
-        return post_num_list, title
+        return post_num_list
             
     
 

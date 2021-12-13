@@ -14,7 +14,6 @@ class Deleter:
             "nos[]": None,
             "_GALLTYPE_": "M",
         }
-        self.title = ""
     
     def set_post_data(self):
 
@@ -24,9 +23,8 @@ class Deleter:
         self.post_data["ci_t"] = self.session.cookies['ci_c']
 
         crawler = Crawler(self.gall_id)
-        list, title = crawler.search_post_nums()
+        list = crawler.search_post_nums()
         self.post_data["nos[]"] = list
-        self.title = title
 
     def delete(self):
 
@@ -42,7 +40,7 @@ class Deleter:
 
             if "success" in response.text:
                 logging.basicConfig(filename='deleter.log',level=logging.INFO, format = Log_Format)
-                logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]) + self.title)
+                logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]))
                 
             else:
                 logging.basicConfig(filename='deleter.log',level=logging.WARNING, format = Log_Format)
