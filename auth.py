@@ -27,7 +27,7 @@ def login(user_id, pw):
     response = session.post(url, data=login_data)
     if "history.back(-1);" in response.text:
         print("Cannot create login session.")
-        return 0
+        exit()
     
     else :
         print("Login session created successfully.")
