@@ -1,17 +1,21 @@
 import sys
-import schedule
-import datetime
 import time
 import requests
+import schedule
+from datetime import datetime
+
 from auth import login, logout
 from blocker import Blocker
+from deleter import Deleter
 
 def main(session: requests.Session, gall_id):
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     print(now)
-    blocker = Blocker(session, gall_id)
-    blocker.block()
+    # blocker = Blocker(session, gall_id)
+    # blocker.block()
+    deleter = Deleter(session, gall_id)
+    deleter.delete()
     logout(session)
 
 if __name__ == "__main__":
@@ -24,9 +28,9 @@ if __name__ == "__main__":
     if session == 0:
         exit()
 
+    main(session, gall_id)
     schedule.every(60).minutes.do(main, session, gall_id)
 
-    main(session, gall_id)
     while True:
         schedule.run_pending()
         time.sleep(10)

@@ -21,7 +21,7 @@ class Blocker:
     def set_post_data(self):
 
         BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
-        params = {'id': self.gall_id }
+        params = {'id': self.gall_id}
         self.session.get(BASE_URL, params=params)
         self.post_data["ci_t"] = self.session.cookies['ci_c']
 
