@@ -8,14 +8,15 @@ from auth import login, logout
 from blocker import Blocker
 from deleter import Deleter
 
-def main(session: requests.Session, gall_id):
+def main(user_id, user_pw, gall_id):
 
     now = datetime.now()
     print(now)
-    # blocker = Blocker(session, gall_id)
-    # blocker.block()
-    deleter = Deleter(session, gall_id)
-    deleter.delete()
+    session = login(user_id, user_pw)
+    blocker = Blocker(session, gall_id)
+    blocker.block()
+    # deleter = Deleter(session, gall_id)
+    # deleter.delete()
     logout(session)
 
 if __name__ == "__main__":
@@ -24,12 +25,8 @@ if __name__ == "__main__":
     user_id = sys.argv[2]
     user_pw = sys.argv[3]
    
-    session = login(user_id, user_pw)
-    if session == 0:
-        exit()
-
-    main(session, gall_id)
-    schedule.every(60).minutes.do(main, session, gall_id)
+    main(user_id, user_pw, gall_id)
+    schedule.every(60).minutes.do(main, user_id, user_pw, gall_id)
 
     while True:
         schedule.run_pending()
