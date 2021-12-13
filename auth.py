@@ -16,9 +16,6 @@ def login(user_id, pw):
     loginForm = soup.find('form', attrs={'id': 'login_process'})
     auth = loginForm.find_all('input', attrs = {'type':'hidden'})[2]
 
-    
-
-
     login_data = {
         's_url': '//www.dcinside.com/',
         'ssl': 'Y',
@@ -35,9 +32,7 @@ def login(user_id, pw):
     else :
         print("Login session created successfully.")
 
-        BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
-        params = { 'id': 'pessimism',}
-        response = session.get(BASE_URL, params=params)
+        
         return session
 
 def logout(session: requests.Session):
