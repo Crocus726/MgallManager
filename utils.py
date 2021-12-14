@@ -52,10 +52,10 @@ def banned_users():
     f.close()
     return banned_user_list
 
+def auth():
 
-if __name__ == "__main__":
+    f = open("auth.txt", mode="r")
+    line = f.readline().split(" ")
+    user_id, user_pw = line
 
-    lists = banned_users()
-    print(lists)
-
-    pass
+    return user_id, user_pw

@@ -35,14 +35,3 @@ class Crawler:
                 post_num_list.append(int(post_num))
 
         return post_num_list
-
-
-if __name__ == "__main__":
-
-    gall_id = sys.argv[1]
-
-    crawler = Crawler(gall_id)
-    list = crawler.search_post_nums()
-    print(list)
-
-    pass
