@@ -1,13 +1,12 @@
 import requests
 import sys
 from bs4 import BeautifulSoup
-from auth import login, logout
+from ban_lists import banned_users
 
 class Crawler:
 
     def __init__(self, gall_id):
-        
-        # self.session = requests.Session()
+
         self.gall_id = gall_id
         self.BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
         self.params = {'id': self.gall_id}
@@ -26,11 +25,11 @@ class Crawler:
 
         for i in titles:
 
-            # title = i.find('a').text
             nick = i.find('td', class_ = "gall_writer ub-writer").text
             post_num = i.find('td', class_ = "gall_num").text
-            
-            if "♡" in nick :
+            banned_user_list = banned_users()
+
+            if any(i in nick for i in banned_user_list) :
                 post_num_list.append(int(post_num))
 
         return post_num_list
