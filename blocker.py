@@ -41,8 +41,7 @@ class Blocker:
             mobile_time = self.post_data["mobile_time"]
 
             logging.basicConfig(filename="deleter.log", level=logging.INFO, format=Log_Format)
-            logger.info(f"VPN 차단 : {proxy_time}시간", end=", ")
-            logger.info(f"통신사 IP 차단 : {mobile_time}분")
+            logger.info(f"VPN block : {proxy_time} h, Mobile IP block : {mobile_time} min")
 
         else:
             logging.basicConfig(
