@@ -1,4 +1,5 @@
 import requests
+import logging
 
 class Blocker:
 
@@ -26,8 +27,11 @@ class Blocker:
         self.post_data["ci_t"] = self.session.cookies['ci_c']
 
     def block(self):
-        
-        self.set_post_data()
+
+        logger = logging.getLogger()
+        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+
+        self.set_post_data() 
         url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
         response = self.session.post(url, data=self.post_data)
 
@@ -36,8 +40,10 @@ class Blocker:
             proxy_time = self.post_data["proxy_time"]//60
             mobile_time = self.post_data["mobile_time"]
 
-            print(f"VPN 차단 : {proxy_time}시간", end = ", ")
-            print(f"통신사 IP 차단 : {mobile_time}분")
+            logging.basicConfig(filename='deleter.log',level=logging.INFO, format = Log_Format)
+            logger.info(f"VPN 차단 : {proxy_time}시간", end = ", ")
+            logger.info(f"통신사 IP 차단 : {mobile_time}분")
     
         else:
-            print("Cannot manage gallery settings.")
+            logging.basicConfig(filename='deleter.log',level=logging.INFO, format = Log_Format)
+            logger.warning("Cannot manage gallery settings.")

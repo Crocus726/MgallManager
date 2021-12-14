@@ -28,9 +28,10 @@ class Deleter:
 
     def delete(self):
 
-        self.set_post_data()
         logger = logging.getLogger()
         Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+
+        self.set_post_data()
         if len(self.post_data["nos[]"]) == 0:
             return
 
