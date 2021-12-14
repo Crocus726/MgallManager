@@ -1,4 +1,4 @@
-# MgallManager
+# MgallManager [CLI_ver]
 
 마이너 갤러리 관리 프로그램
 
