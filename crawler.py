@@ -1,5 +1,4 @@
 import requests
-import sys
 from bs4 import BeautifulSoup
 from utils import banned_users
 
