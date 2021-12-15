@@ -19,9 +19,11 @@ auth.txt 에 있는 주석을 지우고 자신의 아이디와 비밀번호를 �
 
 주석 지우고 게시글을 삭제하고 싶은 사용자의 닉네임을 banned_users.txt에 저장합니다.
 
+```
 python main.py (갤러리 id) (모드)
 
 예시) python main.py elsa block
+```
 
 # 모드
 
