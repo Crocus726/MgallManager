@@ -29,7 +29,6 @@ def login(user_id, pw):
 
     response = session.post(url, data=login_data)
     if "history.back(-1);" in response.text:
-        print("Cannot create login session.")
         exit()
 
     else:
@@ -38,6 +37,15 @@ def login(user_id, pw):
 
 def logout(session: requests.Session):
     session.close()
+
+
+def check_auth(session: requests.Session, gall_id):
+
+    url = "https://gall.dcinside.com/mgallery/management"
+    params = {"id": gall_id}
+
+    response = session.get(url, params=params)
+    return not ("replace" in response.text)
 
 def banned_users():
 
