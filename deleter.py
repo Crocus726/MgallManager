@@ -1,3 +1,4 @@
+from copy import deepcopy
 import requests
 import logging
 from crawler import Crawler
@@ -6,7 +7,7 @@ from crawler import Crawler
 class Deleter:
     def __init__(self, session: requests.Session, gall_id):
 
-        self.session = session
+        self.session = deepcopy(session)
         self.gall_id = gall_id
         self.post_data = {
             "ci_t": None,
@@ -23,7 +24,7 @@ class Deleter:
         self.post_data["ci_t"] = self.session.cookies["ci_c"]
 
         crawler = Crawler(self.session, self.gall_id)
-        list = crawler.search_post_nums()
+        list = crawler.get_post_nums()
         self.post_data["nos[]"] = list
 
     def delete(self):
