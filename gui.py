@@ -50,7 +50,7 @@ class MgallManager(QWidget):
         self.block_mobile_text = QLabel("통신사 IP 차단", self)
         self.block_mobile_box = QComboBox(self)
         self.block_mobile_box.addItems(["60분", "30분", "차단 해제"])
-        self.block_apply = QPushButton("1회 적용", self)
+        self.block_apply = QPushButton("적용", self)
         self.block_apply.setEnabled(False)
         self.block_auto = QPushButton("자동 차단", self)
         self.block_auto.setEnabled(False)
@@ -122,16 +122,17 @@ class MgallManager(QWidget):
         self.connect_button.setText("권한 확인")
         self.block_proxy_status_text.setText("VPN : ")
         self.block_mobile_status_text.setText("통신사 IP : ")
-        self.id_text.setEnabled(True)
-        self.pw_text.setEnabled(True)
-        self.login_button.setEnabled(True)
-        self.logout_button.setEnabled(False)
-        self.block_apply.setEnabled(False)
-        self.block_auto.setEnabled(False)
-        self.delete_button.setEnabled(False)
-        self.delete_auto_button.setEnabled(False)
+        self.setloginbuttons(True)
+        self.setmanagebuttons(False)
 
-    def setbuttons(self, state: bool):
+    def setloginbuttons(self, state: bool):
+        self.id_text.setEnabled(state)
+        self.pw_text.setEnabled(state)
+        self.login_button.setEnabled(state)
+        self.logout_button.setEnabled(not state)
+        self.connect_button.setEnabled(not state)
+
+    def setmanagebuttons(self, state: bool):
         self.block_apply.setEnabled(state)
         self.block_auto.setEnabled(state)
         self.delete_button.setEnabled(state)
@@ -156,11 +157,7 @@ class MgallManager(QWidget):
         else:
             self.login_status_text.setText("로그인 완료")
             self.manager_status_text.setText("로그인 완료")
-            self.id_text.setEnabled(False)
-            self.pw_text.setEnabled(False)
-            self.login_button.setEnabled(False)
-            self.logout_button.setEnabled(True)
-            self.connect_button.setEnabled(True)
+            self.setloginbuttons(False)
             return
 
     def trylogout(self):
@@ -185,11 +182,11 @@ class MgallManager(QWidget):
                     proxy_text, mobile_text = texts
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
-                self.setbuttons(True)
+                self.setmanagebuttons(True)
 
             else:
                 self.manager_status_text.setText("관리자 권한 없음")
-                self.setbuttons(False)
+                self.setmanagebuttons(False)
 
         else:
             self.manager_status_text.setText("로그인되지 않음")
