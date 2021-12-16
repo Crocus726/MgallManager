@@ -29,16 +29,16 @@ class MgallManager(QWidget):
         self.pw_checkbox.stateChanged.connect(self.hidePassword)
         self.pw_checkbox.toggle()
         self.login_button = QPushButton("로그인", self)
-        self.login_button.clicked.connect(self.trylogin)
+        self.login_button.clicked.connect(self.tryLogin)
         self.logout_button = QPushButton("로그아웃", self)
         self.logout_button.setEnabled(False)
-        self.logout_button.clicked.connect(self.trylogout)
+        self.logout_button.clicked.connect(self.tryLogout)
         self.login_status_text = QLabel("로그인되지 않음", self)
 
         self.gall_id_text = QLineEdit(self)
         self.gall_id_text.setPlaceholderText("Gallery ID")
         self.connect_button = QPushButton("권한 확인", self)
-        self.connect_button.clicked.connect(self.trycheckauth)
+        self.connect_button.clicked.connect(self.tryCheckauth)
         self.connect_button.setEnabled(False)
         self.Mgall_rbutton = QRadioButton("마이너 갤러리", self)
         self.mgall_rbutton = QRadioButton("미니 갤러리", self)
@@ -122,17 +122,17 @@ class MgallManager(QWidget):
         self.connect_button.setText("권한 확인")
         self.block_proxy_status_text.setText("VPN : ")
         self.block_mobile_status_text.setText("통신사 IP : ")
-        self.setloginbuttons(True)
-        self.setmanagebuttons(False)
+        self.setLoginbuttons(True)
+        self.setManagebuttons(False)
 
-    def setloginbuttons(self, state: bool):
+    def setLoginbuttons(self, state: bool):
         self.id_text.setEnabled(state)
         self.pw_text.setEnabled(state)
         self.login_button.setEnabled(state)
         self.logout_button.setEnabled(not state)
         self.connect_button.setEnabled(not state)
 
-    def setmanagebuttons(self, state: bool):
+    def setManagebuttons(self, state: bool):
         self.block_apply.setEnabled(state)
         self.block_auto.setEnabled(state)
         self.delete_button.setEnabled(state)
@@ -145,7 +145,7 @@ class MgallManager(QWidget):
         else:
             self.pw_text.setEchoMode(QLineEdit.Normal)
 
-    def trylogin(self):
+    def tryLogin(self):
         user_id = self.id_text.text()
         user_pw = self.pw_text.text()
 
@@ -157,10 +157,10 @@ class MgallManager(QWidget):
         else:
             self.login_status_text.setText("로그인 완료")
             self.manager_status_text.setText("로그인 완료")
-            self.setloginbuttons(False)
+            self.setLoginbuttons(False)
             return
 
-    def trylogout(self):
+    def tryLogout(self):
 
         if self.session is not None:
             logout(self.session)
@@ -169,7 +169,7 @@ class MgallManager(QWidget):
 
         return
 
-    def trycheckauth(self):
+    def tryCheckauth(self):
         gall_id = self.gall_id_text.text()
 
         if self.session is not None:
@@ -182,11 +182,11 @@ class MgallManager(QWidget):
                     proxy_text, mobile_text = texts
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
-                self.setmanagebuttons(True)
+                self.setManagebuttons(True)
 
             else:
                 self.manager_status_text.setText("관리자 권한 없음")
-                self.setmanagebuttons(False)
+                self.setManagebuttons(False)
 
         else:
             self.manager_status_text.setText("로그인되지 않음")
