@@ -4,8 +4,9 @@ from utils import banned_users
 
 
 class Crawler:
-    def __init__(self, gall_id):
+    def __init__(self, session: requests.Session, gall_id):
 
+        self.session = session
         self.gall_id = gall_id
         self.BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
         self.params = {"id": self.gall_id}
