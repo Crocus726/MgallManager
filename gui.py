@@ -3,13 +3,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from utils import login, logout
+from utils import login, logout, checkauth
 
 
-class MyApp(QWidget):
+class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.session = None
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -24,16 +25,16 @@ class MyApp(QWidget):
         self.login_button = QPushButton("로그인", self)
         # 로그인 시 로그아웃 버튼으로 활성화
         self.login_button.setMaximumHeight(500)
-        self.login_status = "로그인되지 않음"
-        self.login_status_text = QLabel("%s" % self.login_status, self)
+        self.login_button.clicked.connect(self.trylogin)
+        self.login_status_text = QLabel("로그인되지 않음", self)
 
         self.gall_id_text = QLineEdit(self)
         self.gall_id_text.setPlaceholderText("Gallery ID")
         self.connect_button = QPushButton("접속", self)
+        self.connect_button.clicked.connect(self.trycheckauth)
         self.Mgall_rbutton = QRadioButton("마이너 갤러리", self)
         self.mgall_rbutton = QRadioButton("미니 갤러리", self)
-        self.manager_status = "권한 없음"
-        self.manager_status_text = QLabel("%s" % self.manager_status, self)
+        self.manager_status_text = QLabel("", self)
 
         self.block_vpn_text = QLabel("VPN 차단", self)
         self.block_vpn_box = QComboBox(self)
@@ -47,8 +48,7 @@ class MyApp(QWidget):
         self.block_mobile_box.addItem("차단 해제")
         self.block_apply = QPushButton("1회 적용", self)
         self.block_auto = QPushButton("자동 차단", self)
-        self.block_status = "차단 비활성화됨"
-        self.block_status_text = QLabel("%s" % self.block_status, self)
+        self.block_status_text = QLabel("차단 비활성화됨", self)
 
         self.delete_text = QLineEdit(self)
         self.delete_text.setPlaceholderText("사용자 ID 리스트 입력")
@@ -105,6 +105,7 @@ class MyApp(QWidget):
         layout.addWidget(deleterbox)
 
         self.setWindowTitle("MgallManager")
+        self.setFixedSize(350, 400)
         self.setLayout(layout)
         self.move(300, 300)
         self.show()
@@ -116,8 +117,51 @@ class MyApp(QWidget):
         else:
             self.pw_text.setEchoMode(QLineEdit.Normal)
 
+    def trylogin(self):
+        user_id = self.id_text.text()
+        user_pw = self.pw_text.text()
+
+        self.session = login(user_id, user_pw)
+        if self.session is None:
+            self.login_status_text.setText("로그인 실패")
+
+            return
+
+        else:
+            self.login_status_text.setText("로그인 완료")
+            self.id_text.setEnabled(False)
+            self.pw_text.setEnabled(False)
+            self.login_button.setEnabled(False)
+
+            return
+
+    def trylogout(self):
+        if self.session is not None:
+            logout(self.session)
+            self.session = None
+            """
+            버튼 초기화하기.
+            """
+
+            return
+
+    def trycheckauth(self):
+        gall_id = self.gall_id_text.text()
+
+        if self.session is not None:
+            status = checkauth(self.session, gall_id)
+            if status:
+                self.manager_status_text.setText("관리자 권한 확인됨")
+            else:
+                self.manager_status_text.setText("관리자 권한 없음")
+
+        else:
+            self.manager_status_text.setText("로그인되지 않음")
+
+        return
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = MyApp()
+    ex = MgallManager()
     sys.exit(app.exec_())
