@@ -1,3 +1,4 @@
+from copy import deepcopy
 import requests
 import logging
 
@@ -5,7 +6,7 @@ import logging
 class Blocker:
     def __init__(self, session: requests.Session, gall_id):
 
-        self.session = session
+        self.session = deepcopy(session)
         self.gall_id = gall_id
         self.post_data = {
             "ci_t": None,
@@ -40,7 +41,9 @@ class Blocker:
             proxy_time = self.post_data["proxy_time"] // 60
             mobile_time = self.post_data["mobile_time"]
 
-            logging.basicConfig(filename="deleter.log", level=logging.INFO, format=Log_Format)
+            logging.basicConfig(
+                filename="deleter.log", level=logging.INFO, format=Log_Format
+            )
             logger.info(f"VPN block : {proxy_time} h, Mobile IP block : {mobile_time} min")
 
         else:
