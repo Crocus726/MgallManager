@@ -47,7 +47,11 @@ def checkauth(session: requests.Session, gall_id):
     params = {"id": gall_id}
 
     response = session.get(url, params=params)
+    if response.status_code != 200:
+        return False
+
     return not ("replace" in response.text)
+
 
 def banned_users():
 
