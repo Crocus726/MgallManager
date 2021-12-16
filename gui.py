@@ -1,4 +1,6 @@
 import sys
+import time
+import schedule
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -13,6 +15,7 @@ class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.gall_id = None
         self.session = None
         self.crawler = None
         self.deleter = None
@@ -51,8 +54,10 @@ class MgallManager(QWidget):
         self.block_mobile_box = QComboBox(self)
         self.block_mobile_box.addItems(["60분", "30분", "차단 해제"])
         self.block_apply = QPushButton("적용", self)
+        self.block_apply.clicked.connect(self.tryBlock)
         self.block_apply.setEnabled(False)
         self.block_auto = QPushButton("자동 차단", self)
+        self.block_auto.pressed.connect(self.tryBlock_auto)
         self.block_auto.setEnabled(False)
         self.block_proxy_status_text = QLabel("VPN : ", self)
         self.block_mobile_status_text = QLabel("통신사 IP : ", self)
@@ -124,6 +129,7 @@ class MgallManager(QWidget):
         self.block_mobile_status_text.setText("통신사 IP : ")
         self.setLoginbuttons(True)
         self.setManagebuttons(False)
+        self.block_auto.setText("자동 차단")
 
     def setLoginbuttons(self, state: bool):
         self.id_text.setEnabled(state)
@@ -165,23 +171,38 @@ class MgallManager(QWidget):
         if self.session is not None:
             logout(self.session)
             self.session = None
+            self.crawler = None
+            self.blocker = None
         self.initStatus()
 
         return
 
-    def tryCheckauth(self):
-        gall_id = self.gall_id_text.text()
+    def get_gall_id(self):
+        self.gall_id = self.gall_id_text.text()
 
-        if self.session is not None:
-            status = checkauth(self.session, gall_id)
-            if status:
-                self.manager_status_text.setText("관리자 권한 확인됨")
-                self.crawler = Crawler(self.session, gall_id)
-                texts = self.crawler.get_blocktime()
-                if texts is not None:
-                    proxy_text, mobile_text = texts
+    def update_blocktime(self):
+
+        if self.crawler is not None and self.blocker is not None:
+            texts = self.crawler.get_blocktime()
+            if texts is not None:
+                proxy_text, mobile_text = texts
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
+
+        return
+
+    def tryCheckauth(self):
+
+        if self.gall_id is None:
+            self.get_gall_id()
+
+        if self.session is not None:
+            status = checkauth(self.session, self.gall_id)
+            if status:
+                self.manager_status_text.setText("관리자 권한 확인됨")
+                self.crawler = Crawler(self.session, self.gall_id)
+                self.blocker = Blocker(self.session, self.gall_id)
+                self.update_blocktime()
                 self.setManagebuttons(True)
 
             else:
@@ -193,8 +214,24 @@ class MgallManager(QWidget):
 
         return
 
+    def tryBlock(self):
+        if self.blocker is not None:
+            self.blocker.block()
+            self.update_blocktime()
+
+        return
+
+    def tryBlock_auto(self):
+        self.tryBlock()
+        schedule.every(1).minutes.do(self.tryBlock)
+        # schedule.every(1).minutes.do(self.update_blocktime)
+        # self.block_auto.setEnabled(False)
+        self.block_auto.pressed(True)
+        self.block_auto.setText("활성화됨")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    schedule.run_pending()
     ex = MgallManager()
     sys.exit(app.exec_())

@@ -29,25 +29,8 @@ class Blocker:
 
     def block(self):
 
-        logger = logging.getLogger()
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-
         self.set_post_data()
         url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
         response = self.session.post(url, data=self.post_data)
 
-        if "success" in response.text:
-
-            proxy_time = self.post_data["proxy_time"] // 60
-            mobile_time = self.post_data["mobile_time"]
-
-            logging.basicConfig(
-                filename="deleter.log", level=logging.INFO, format=Log_Format
-            )
-            logger.info(f"VPN block : {proxy_time} h, Mobile IP block : {mobile_time} min")
-
-        else:
-            logging.basicConfig(
-                filename="deleter.log", level=logging.INFO, format=Log_Format
-            )
-            logger.warning("Cannot manage gallery settings.")
+        return "success" in response.text
