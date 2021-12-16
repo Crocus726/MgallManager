@@ -29,7 +29,7 @@ def login(user_id, pw):
 
     response = session.post(url, data=login_data)
     if "history.back(-1);" in response.text:
-        exit()
+        return None
 
     else:
         return session
@@ -38,8 +38,10 @@ def login(user_id, pw):
 def logout(session: requests.Session):
     session.close()
 
+    return
 
-def check_auth(session: requests.Session, gall_id):
+
+def checkauth(session: requests.Session, gall_id):
 
     url = "https://gall.dcinside.com/mgallery/management"
     params = {"id": gall_id}
@@ -59,11 +61,3 @@ def banned_users():
 
     f.close()
     return banned_user_list
-
-def auth():
-
-    f = open("auth.txt", mode="r")
-    line = f.readline().split(" ")
-    user_id, user_pw = line
-
-    return user_id, user_pw
