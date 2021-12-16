@@ -22,7 +22,7 @@ class Deleter:
         self.session.get(BASE_URL, params=params)
         self.post_data["ci_t"] = self.session.cookies["ci_c"]
 
-        crawler = Crawler(self.gall_id)
+        crawler = Crawler(self.session, self.gall_id)
         list = crawler.search_post_nums()
         self.post_data["nos[]"] = list
 
