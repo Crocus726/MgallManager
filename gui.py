@@ -1,7 +1,5 @@
 import sys
 import threading
-import timer
-import schedule
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -234,7 +232,6 @@ class MgallManager(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    schedule.run_pending()
     ex = MgallManager()
     app.aboutToQuit.connect(ex.ExitHandler)
     sys.exit(app.exec_())
