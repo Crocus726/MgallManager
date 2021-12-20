@@ -1,5 +1,6 @@
 import sys
-import time
+import threading
+import timer
 import schedule
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -15,6 +16,7 @@ class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.timer = threading.Timer(60 * 59, self.tryBlock_auto_press)
         self.gall_id = None
         self.session = None
         self.crawler = None
@@ -53,12 +55,12 @@ class MgallManager(QWidget):
         self.block_mobile_text = QLabel("통신사 IP 차단", self)
         self.block_mobile_box = QComboBox(self)
         self.block_mobile_box.addItems(["60분", "30분", "차단 해제"])
-        self.block_apply = QPushButton("적용", self)
-        self.block_apply.clicked.connect(self.tryBlock)
-        self.block_apply.setEnabled(False)
-        self.block_auto = QPushButton("자동 차단", self)
-        self.block_auto.pressed.connect(self.tryBlock_auto)
-        self.block_auto.setEnabled(False)
+        self.block_apply_button = QPushButton("적용", self)
+        self.block_apply_button.clicked.connect(self.tryBlock)
+        self.block_apply_button.setEnabled(False)
+        self.block_auto_button = QPushButton("자동 차단", self)
+        self.block_auto_button.pressed.connect(self.tryBlock_auto_press)
+        self.block_auto_button.setEnabled(False)
         self.block_proxy_status_text = QLabel("VPN : ", self)
         self.block_mobile_status_text = QLabel("통신사 IP : ", self)
 
@@ -100,10 +102,10 @@ class MgallManager(QWidget):
         blockerLayout.addWidget(self.block_vpn_box, 2, 4, 1, 1)
         blockerLayout.addWidget(self.block_mobile_text, 3, 2, 1, 2)
         blockerLayout.addWidget(self.block_mobile_box, 3, 4, 1, 1)
-        blockerLayout.addWidget(self.block_apply, 2, 5, 1, 1)
-        blockerLayout.addWidget(self.block_auto, 3, 5, 1, 1)
-        blockerLayout.addWidget(self.block_proxy_status_text, 5, 2, 1, 4)
-        blockerLayout.addWidget(self.block_mobile_status_text, 6, 2, 1, 4)
+        blockerLayout.addWidget(self.block_apply_button, 2, 5, 1, 1)
+        blockerLayout.addWidget(self.block_auto_button, 3, 5, 1, 1)
+        blockerLayout.addWidget(self.block_proxy_status_text, 5, 2, 1, 3)
+        blockerLayout.addWidget(self.block_mobile_status_text, 6, 2, 1, 3)
         layout.addWidget(blockerbox)
 
         deleterbox = QGroupBox()
@@ -129,7 +131,7 @@ class MgallManager(QWidget):
         self.block_mobile_status_text.setText("통신사 IP : ")
         self.setLoginbuttons(True)
         self.setManagebuttons(False)
-        self.block_auto.setText("자동 차단")
+        self.block_auto_button.setText("자동 차단")
 
     def setLoginbuttons(self, state: bool):
         self.id_text.setEnabled(state)
@@ -139,8 +141,8 @@ class MgallManager(QWidget):
         self.connect_button.setEnabled(not state)
 
     def setManagebuttons(self, state: bool):
-        self.block_apply.setEnabled(state)
-        self.block_auto.setEnabled(state)
+        self.block_apply_button.setEnabled(state)
+        self.block_auto_button.setEnabled(state)
         self.delete_button.setEnabled(state)
         self.delete_auto_button.setEnabled(state)
 
@@ -189,8 +191,6 @@ class MgallManager(QWidget):
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
 
-        return
-
     def tryCheckauth(self):
 
         if self.gall_id is None:
@@ -212,26 +212,29 @@ class MgallManager(QWidget):
         else:
             self.manager_status_text.setText("로그인되지 않음")
 
-        return
-
     def tryBlock(self):
         if self.blocker is not None:
             self.blocker.block()
             self.update_blocktime()
 
-        return
-
-    def tryBlock_auto(self):
+    def tryBlock_auto_press(self):
         self.tryBlock()
-        schedule.every(1).minutes.do(self.tryBlock)
-        # schedule.every(1).minutes.do(self.update_blocktime)
-        # self.block_auto.setEnabled(False)
-        self.block_auto.pressed(True)
-        self.block_auto.setText("활성화됨")
+        self.block_auto_button.setEnabled(False)
+        self.block_auto_button.setText("활성화됨")
+        self.timer.start()
+
+    def tryBlock_stop(self):
+        self.block_auto_button.setEnabled(True)
+        self.block_auto_button.setText("자동 차단")
+        self.timer.cancel()
+
+    def ExitHandler(self):
+        self.timer.cancel()
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     schedule.run_pending()
     ex = MgallManager()
+    app.aboutToQuit.connect(ex.ExitHandler)
     sys.exit(app.exec_())
