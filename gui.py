@@ -14,7 +14,7 @@ class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.timer = threading.Timer(60 * 59, self.tryBlock_auto_press)
+        self.timer = threading.Timer(60 * 59, self.tryBlock_auto)
         self.gall_id = None
         self.session = None
         self.crawler = None
@@ -57,8 +57,11 @@ class MgallManager(QWidget):
         self.block_apply_button.clicked.connect(self.tryBlock)
         self.block_apply_button.setEnabled(False)
         self.block_auto_button = QPushButton("자동 차단", self)
-        self.block_auto_button.pressed.connect(self.tryBlock_auto_press)
+        self.block_auto_button.pressed.connect(self.tryBlock_auto)
         self.block_auto_button.setEnabled(False)
+        self.block_stop_button = QPushButton("차단 중지", self)
+        self.block_stop_button.pressed.connect(self.tryBlock_stop)
+        self.block_stop_button.setEnabled(False)
         self.block_proxy_status_text = QLabel("VPN : ", self)
         self.block_mobile_status_text = QLabel("통신사 IP : ", self)
 
@@ -104,6 +107,7 @@ class MgallManager(QWidget):
         blockerLayout.addWidget(self.block_auto_button, 3, 5, 1, 1)
         blockerLayout.addWidget(self.block_proxy_status_text, 5, 2, 1, 3)
         blockerLayout.addWidget(self.block_mobile_status_text, 6, 2, 1, 3)
+        blockerLayout.addWidget(self.block_stop_button, 5, 5, 1, 1)
         layout.addWidget(blockerbox)
 
         deleterbox = QGroupBox()
@@ -215,16 +219,20 @@ class MgallManager(QWidget):
             self.blocker.block()
             self.update_blocktime()
 
-    def tryBlock_auto_press(self):
+    def tryBlock_auto(self):
         self.tryBlock()
         self.block_auto_button.setEnabled(False)
         self.block_auto_button.setText("활성화됨")
-        self.timer.start()
+        self.block_stop_button.setEnabled(True)
+        if not self.timer.is_alive():
+            self.timer.start()
 
     def tryBlock_stop(self):
         self.block_auto_button.setEnabled(True)
         self.block_auto_button.setText("자동 차단")
+        self.block_stop_button.setEnabled(False)
         self.timer.cancel()
+        self.timer.__init__(60 * 59, self.tryBlock_auto)
 
     def ExitHandler(self):
         self.timer.cancel()
