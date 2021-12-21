@@ -1,4 +1,5 @@
 import sys
+import os
 import threading
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -6,17 +7,19 @@ from PyQt5.QtGui import *
 
 from utils import login, logout, checkauth
 from crawler import Crawler
-from deleter import Deleter
 from blocker import Blocker
+from deleter import Deleter
+from const import BLOCK_TIME
 
 
 class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.timer = threading.Timer(60 * 59, self.tryBlock_auto)
+        self.timer = threading.Timer(BLOCK_TIME, self.tryBlock_auto)
         self.gall_id = None
         self.session = None
+
         self.crawler = None
         self.deleter = None
         self.blocker = None
@@ -25,55 +28,43 @@ class MgallManager(QWidget):
         layout = QVBoxLayout()
 
         self.id_text = QLineEdit(self)
-        self.id_text.setPlaceholderText("ID")
         self.pw_text = QLineEdit(self)
-        self.pw_text.setPlaceholderText("PW")
-        self.pw_checkbox = QCheckBox("비밀번호 숨기기", self)
-        self.pw_checkbox.stateChanged.connect(self.hidePassword)
-        self.pw_checkbox.toggle()
-        self.login_button = QPushButton("로그인", self)
-        self.login_button.clicked.connect(self.tryLogin)
-        self.logout_button = QPushButton("로그아웃", self)
+        self.pw_checkbox = QCheckBox(self)
+        self.login_button = QPushButton(self)
+        self.logout_button = QPushButton(self)
         self.logout_button.setEnabled(False)
-        self.logout_button.clicked.connect(self.tryLogout)
-        self.login_status_text = QLabel("로그인되지 않음", self)
-
+        self.login_status_text = QLabel(self)
         self.gall_id_text = QLineEdit(self)
-        self.gall_id_text.setPlaceholderText("Gallery ID")
-        self.connect_button = QPushButton("권한 확인", self)
-        self.connect_button.clicked.connect(self.tryCheckauth)
+        self.connect_button = QPushButton(self)
         self.connect_button.setEnabled(False)
-        self.Mgall_rbutton = QRadioButton("마이너 갤러리", self)
-        self.mgall_rbutton = QRadioButton("미니 갤러리", self)
-        self.manager_status_text = QLabel("로그인되지 않음", self)
+        self.Mgall_rbutton = QRadioButton(self)
+        self.Mgall_rbutton.toggle()
+        # self.mgall_rbutton = QRadioButton(self)
+        self.manager_status_text = QLabel(self)
 
-        self.block_vpn_text = QLabel("VPN 차단", self)
-        self.block_vpn_box = QComboBox(self)
-        self.block_vpn_box.addItems(["48시간", "24시간", "차단 해제"])
-        self.block_mobile_text = QLabel("통신사 IP 차단", self)
+        self.block_proxy_text = QLabel(self)
+        self.block_proxy_box = QComboBox(self)
+        self.block_mobile_text = QLabel(self)
         self.block_mobile_box = QComboBox(self)
-        self.block_mobile_box.addItems(["60분", "30분", "차단 해제"])
-        self.block_apply_button = QPushButton("적용", self)
-        self.block_apply_button.clicked.connect(self.tryBlock)
+        self.block_apply_button = QPushButton(self)
         self.block_apply_button.setEnabled(False)
-        self.block_auto_button = QPushButton("자동 차단", self)
-        self.block_auto_button.pressed.connect(self.tryBlock_auto)
+        self.block_auto_button = QPushButton(self)
         self.block_auto_button.setEnabled(False)
-        self.block_stop_button = QPushButton("차단 중지", self)
-        self.block_stop_button.pressed.connect(self.tryBlock_stop)
+        self.block_stop_button = QPushButton(self)
         self.block_stop_button.setEnabled(False)
-        self.block_proxy_status_text = QLabel("VPN : ", self)
-        self.block_mobile_status_text = QLabel("통신사 IP : ", self)
+        self.block_proxy_status_text = QLabel(self)
+        self.block_mobile_status_text = QLabel(self)
 
         self.delete_text = QLineEdit(self)
-        self.delete_text.setPlaceholderText("사용자 ID 리스트 입력")
-        self.delete_button = QPushButton("글 삭제", self)
+        self.delete_button = QPushButton(self)
         self.delete_button.setEnabled(False)
-        self.delete_interval_text = QLabel("삭제 주기", self)
+        self.delete_interval_text = QLabel(self)
         self.delete_box = QComboBox(self)
-        self.delete_box.addItems(["1분", "3분", "5분", "10분"])
-        self.delete_auto_button = QPushButton("자동 삭제", self)
+        self.delete_auto_button = QPushButton(self)
         self.delete_auto_button.setEnabled(False)
+
+        self.buttonConnect()
+        self.initTexts()
 
         loginbox = QGroupBox()
         loginLayout = QGridLayout()
@@ -92,15 +83,15 @@ class MgallManager(QWidget):
         managerLayout.addWidget(self.gall_id_text, 1, 2, 1, 3)
         managerLayout.addWidget(self.connect_button, 1, 5)
         managerLayout.addWidget(self.Mgall_rbutton, 2, 2)
-        managerLayout.addWidget(self.mgall_rbutton, 2, 3)
+        # managerLayout.addWidget(self.mgall_rbutton, 2, 3)
         managerLayout.addWidget(self.manager_status_text, 3, 2)
         layout.addWidget(managerbox)
 
         blockerbox = QGroupBox()
         blockerLayout = QGridLayout()
         blockerbox.setLayout(blockerLayout)
-        blockerLayout.addWidget(self.block_vpn_text, 2, 2, 1, 2)
-        blockerLayout.addWidget(self.block_vpn_box, 2, 4, 1, 1)
+        blockerLayout.addWidget(self.block_proxy_text, 2, 2, 1, 2)
+        blockerLayout.addWidget(self.block_proxy_box, 2, 4, 1, 1)
         blockerLayout.addWidget(self.block_mobile_text, 3, 2, 1, 2)
         blockerLayout.addWidget(self.block_mobile_box, 3, 4, 1, 1)
         blockerLayout.addWidget(self.block_apply_button, 2, 5, 1, 1)
@@ -125,6 +116,46 @@ class MgallManager(QWidget):
         self.setLayout(layout)
         self.show()
 
+    def buttonConnect(self):
+        self.login_button.clicked.connect(self.tryLogin)
+        self.logout_button.clicked.connect(self.tryLogout)
+        self.pw_checkbox.stateChanged.connect(self.hidePassword)
+        self.pw_checkbox.toggle()
+        self.connect_button.clicked.connect(self.tryCheckauth)
+        self.block_apply_button.clicked.connect(self.tryBlock)
+        self.block_auto_button.pressed.connect(self.tryBlock_auto)
+        self.block_stop_button.pressed.connect(self.tryBlock_stop)
+
+    def initTexts(self):
+        self.id_text.setPlaceholderText("ID")
+        self.pw_text.setPlaceholderText("PW")
+        self.pw_checkbox.setText("비밀번호 숨기기")
+        self.login_button.setText("로그인")
+        self.logout_button.setText("로그아웃")
+        self.login_status_text.setText("로그인되지 않음")
+
+        self.gall_id_text.setPlaceholderText("Gallery ID")
+        self.connect_button.setText("권한 확인")
+        self.Mgall_rbutton.setText("마이너 갤러리")
+        # self.mgall_rbutton.setText("미니 갤러리")
+        self.manager_status_text.setText("로그인되지 않음")
+
+        self.block_proxy_text.setText("VPN 차단")
+        self.block_proxy_box.addItems(["48시간", "24시간", "차단 해제"])
+        self.block_mobile_text.setText("통신사 IP 차단")
+        self.block_mobile_box.addItems(["60분", "30분", "차단 해제"])
+        self.block_apply_button.setText("적용")
+        self.block_auto_button.setText("자동 차단")
+        self.block_stop_button.setText("차단 중지")
+        self.block_proxy_status_text.setText("VPN : ")
+        self.block_mobile_status_text.setText("통신사 IP : ")
+
+        self.delete_text.setPlaceholderText("사용자 ID 리스트 입력")
+        self.delete_button.setText("글 삭제")
+        self.delete_interval_text.setText("삭제 주기")
+        self.delete_box.addItems(["1분", "3분", "5분", "10분"])
+        self.delete_auto_button.setText("자동 삭제")
+
     def initStatus(self):
         self.login_status_text.setText("로그인되지 않음")
         self.manager_status_text.setText("로그인되지 않음")
@@ -133,6 +164,8 @@ class MgallManager(QWidget):
         self.block_mobile_status_text.setText("통신사 IP : ")
         self.setLoginbuttons(True)
         self.setManagebuttons(False)
+        self.block_stop_button.setEnabled(False)
+        self.block_auto_button.setEnabled(False)
         self.block_auto_button.setText("자동 차단")
 
     def setLoginbuttons(self, state: bool):
@@ -145,6 +178,7 @@ class MgallManager(QWidget):
     def setManagebuttons(self, state: bool):
         self.block_apply_button.setEnabled(state)
         self.block_auto_button.setEnabled(state)
+        self.block_stop_button.setEnabled(not state)
         self.delete_button.setEnabled(state)
         self.delete_auto_button.setEnabled(state)
 
@@ -174,6 +208,7 @@ class MgallManager(QWidget):
 
         if self.session is not None:
             logout(self.session)
+            self.timer.__init__(BLOCK_TIME, self.tryBlock_auto)
             self.session = None
             self.crawler = None
             self.blocker = None
@@ -204,6 +239,7 @@ class MgallManager(QWidget):
                 self.manager_status_text.setText("관리자 권한 확인됨")
                 self.crawler = Crawler(self.session, self.gall_id)
                 self.blocker = Blocker(self.session, self.gall_id)
+                self.deleter = Deleter(self.session, self.gall_id)
                 self.update_blocktime()
                 self.setManagebuttons(True)
 
@@ -231,11 +267,11 @@ class MgallManager(QWidget):
         self.block_auto_button.setEnabled(True)
         self.block_auto_button.setText("자동 차단")
         self.block_stop_button.setEnabled(False)
-        self.timer.cancel()
-        self.timer.__init__(60 * 59, self.tryBlock_auto)
+        self.timer.__init__(BLOCK_TIME, self.tryBlock_auto)
 
     def ExitHandler(self):
         self.timer.cancel()
+        os._exit(1)
 
 
 if __name__ == "__main__":
