@@ -5,6 +5,7 @@ from gui import MgallManager
 def main():
     app = QApplication(sys.argv)
     ex = MgallManager()
+    app.aboutToQuit.connect(ex.ExitHandler)
     sys.exit(app.exec_())
 
 
