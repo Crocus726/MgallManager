@@ -27,7 +27,7 @@ python main.py
 ```
 또는
 ```
-pyinstaller -F -w --icon="images/logo.png" main.py
+pyinstaller -F -w --icon="icon/orange.ico" main.py -n Mgallmanager.exe
 ```
 또는
 ```
