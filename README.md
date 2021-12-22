@@ -30,10 +30,7 @@ python main.py
 pip install pyinstaller
 pyinstaller -F -w --icon=orange.ico main.py --add-data="orange.ico;." --name Mgallmanager
 ```
-또는
-```
-실행파일을 다운로드하여 실행
-```
+또는 [실행파일 다운로드](https://github.com/Gloriel621/MgallManager/releases/tag/v1.0.0)
 
 ![capture1](https://user-images.githubusercontent.com/65398406/147065794-668d8f6c-96f5-49fa-9d7f-7e44e970cdca.png)
 
