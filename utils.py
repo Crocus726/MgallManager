@@ -51,17 +51,3 @@ def checkauth(session: requests.Session, gall_id):
         return False
 
     return not ("replace" in response.text)
-
-
-def banned_users():
-
-    banned_user_list = []
-
-    f = open("banned_users.txt", mode="r")
-    for line in f:
-        currentline = line.split(",")
-        for i in currentline:
-            banned_user_list.append(i)
-
-    f.close()
-    return banned_user_list
