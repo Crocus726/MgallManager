@@ -24,17 +24,20 @@ class Crawler:
 
         response = requests.get(self.BASE_URL, params=self.params, headers=self.headers)
         html_data = BeautifulSoup(response.content, "html.parser")
-
-        titles = html_data.find("tbody").find_all("tr")
-
         post_num_list = []
 
-        for i in titles:
-            nick = i.find("td", class_="gall_writer ub-writer").text
-            post_num = i.find("td", class_="gall_num").text
+        try:
+            titles = html_data.find("tbody").find_all("tr")
 
-            if any(i in nick for i in delete_user_list):
-                post_num_list.append(int(post_num))
+            for i in titles:
+                nick = i.find("td", class_="gall_writer ub-writer").text
+                post_num = i.find("td", class_="gall_num").text
+
+                if any(i in nick for i in delete_user_list):
+                    post_num_list.append(int(post_num))
+
+        except Exception as e:
+            self.logger.critical(e, exc_info=True)
 
         return post_num_list
 
