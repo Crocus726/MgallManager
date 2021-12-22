@@ -1,5 +1,6 @@
 from copy import deepcopy
 import requests
+import logging
 
 
 class Blocker:
@@ -18,18 +19,30 @@ class Blocker:
             "img_block_use": -1,
             "img_block_time": None,
         }
+        self.logger = logging.getLogger()
+        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+        logging.basicConfig(filename="manager.log", format=Log_Format)
 
     def set_post_data(self):
 
         BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
         params = {"id": self.gall_id}
-        self.session.get(BASE_URL, params=params)
-        self.post_data["ci_t"] = self.session.cookies["ci_c"]
+
+        try:
+            self.session.get(BASE_URL, params=params)
+            self.post_data["ci_t"] = self.session.cookies["ci_c"]
+
+        except Exception as e:
+            self.logger.critical(e, exc_info=True)
 
     def block(self):
 
         self.set_post_data()
         block_url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
-        response = self.session.post(block_url, data=self.post_data)
+
+        try:
+            response = self.session.post(block_url, data=self.post_data)
+        except Exception as e:
+            self.logger.critical(e, exc_info=True)
 
         return "success" in response.text
