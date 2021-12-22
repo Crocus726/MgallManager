@@ -2,8 +2,6 @@ import requests
 from copy import deepcopy
 from bs4 import BeautifulSoup
 
-from utils import banned_users
-
 
 class Crawler:
     def __init__(self, session: requests.Session, gall_id):
@@ -17,7 +15,7 @@ class Crawler:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36"
         }
 
-    def get_post_nums(self):
+    def get_post_nums(self, delete_user_list):
 
         response = requests.get(self.BASE_URL, params=self.params, headers=self.headers)
         html_data = BeautifulSoup(response.content, "html.parser")
@@ -29,9 +27,8 @@ class Crawler:
         for i in titles:
             nick = i.find("td", class_="gall_writer ub-writer").text
             post_num = i.find("td", class_="gall_num").text
-            banned_user_list = banned_users()
 
-            if any(i in nick for i in banned_user_list):
+            if any(i in nick for i in delete_user_list):
                 post_num_list.append(int(post_num))
 
         return post_num_list
