@@ -1,6 +1,5 @@
 from copy import deepcopy
 import requests
-import logging
 
 
 class Blocker:
@@ -30,7 +29,7 @@ class Blocker:
     def block(self):
 
         self.set_post_data()
-        url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
-        response = self.session.post(url, data=self.post_data)
+        block_url = "https://gall.dcinside.com/ajax/managements_ajax/update_ipblock"
+        response = self.session.post(block_url, data=self.post_data)
 
         return "success" in response.text
