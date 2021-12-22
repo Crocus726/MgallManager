@@ -24,15 +24,14 @@ pip -r requirements.txt
 # 실행
 ```
 python main.py
-
+```
 또는
-
-pyinstaller -F -w --icon="images/logo.png" main.py
-
+```
+pyinstaller -F -w --icon="icon/orange.ico" main.py -n Mgallmanager.exe
+```
 또는
-
-실행파일을 받아서 실행
-
+```
+실행파일을 다운로드하여 실행
 ```
 
 ![capture1](https://user-images.githubusercontent.com/65398406/147037070-ce24511d-381a-4a17-b41c-ecc03c20b4c1.png)
