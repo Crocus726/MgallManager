@@ -1,4 +1,3 @@
-import sys
 import os
 import time
 import threading
@@ -328,10 +327,3 @@ class MgallManager(QWidget):
     def ExitHandler(self):
         self.tryLogout()
         os._exit(1)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ex = MgallManager()
-    app.aboutToQuit.connect(ex.ExitHandler)
-    sys.exit(app.exec_())
