@@ -30,15 +30,10 @@ class Deleter:
 
     def delete(self, post_list):
 
-        logger = logging.getLogger()
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-
         self.post_list = post_list
         self.set_post_data()
 
-        # self.post_data["nos[]"]
         if len(self.post_data["nos[]"]) == 0:
-
             return None
 
         else:
@@ -46,9 +41,9 @@ class Deleter:
             response = self.session.post(url, data=self.post_data)
 
             if "success" in response.text:
-                logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]))
+                self.logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]))
 
             else:
-                logger.warning("Cannnot delete posts.")
+                self.logger.warning("Cannnot delete posts.")
 
             return ("success" in response.text)
