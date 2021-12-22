@@ -190,6 +190,9 @@ class MgallManager(QWidget):
         self.block_stop_button.setEnabled(False)
         self.block_auto_button.setEnabled(False)
         self.block_auto_button.setText("자동 차단")
+        self.delete_auto_button.setEnabled(False)
+        self.delete_stop_button.setEnabled(False)
+        self.delete_message_text.setText("")
 
     def setLoginbuttons(self, state: bool):
         self.id_text.setEnabled(state)
