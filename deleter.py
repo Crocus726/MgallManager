@@ -1,7 +1,6 @@
 from copy import deepcopy
 import requests
 import logging
-from crawler import Crawler
 
 
 class Deleter:
@@ -16,6 +15,10 @@ class Deleter:
             "_GALLTYPE_": "M",
         }
         self.post_list = None
+
+        self.logger = logging.getLogger()
+        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+        logging.basicConfig(filename="manager.log", format=Log_Format)
 
     def set_post_data(self):
 
@@ -43,15 +46,9 @@ class Deleter:
             response = self.session.post(url, data=self.post_data)
 
             if "success" in response.text:
-                logging.basicConfig(
-                    filename="deleter.log", level=logging.INFO, format=Log_Format
-                )
                 logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]))
 
             else:
-                logging.basicConfig(
-                    filename="deleter.log", level=logging.WARNING, format=Log_Format
-                )
                 logger.warning("Cannnot delete posts.")
 
             return ("success" in response.text)

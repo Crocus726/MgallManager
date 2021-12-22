@@ -237,10 +237,16 @@ class MgallManager(QWidget):
     def update_blocktime(self):
         if self.crawler is not None and self.blocker is not None:
             texts = self.crawler.get_blocktime()
-            if texts is not None:
+            try:
                 proxy_text, mobile_text = texts
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
+            except Exception as e:
+                # self.logger.critical(e, exc_info=True)
+                self.manager_status_text.setText("갤러리 접속 불가")
+                return False
+
+            return True
 
     def tryCheckauth(self):
         if self.gall_id is None:
@@ -253,8 +259,8 @@ class MgallManager(QWidget):
                 self.crawler = Crawler(self.session, self.gall_id)
                 self.blocker = Blocker(self.session, self.gall_id)
                 self.deleter = Deleter(self.session, self.gall_id)
-                self.update_blocktime()
-                self.setManagebuttons(True)
+                if self.update_blocktime():
+                    self.setManagebuttons(True)
 
             else:
                 self.manager_status_text.setText("관리자 권한 없음")

@@ -1,4 +1,5 @@
 import requests
+import logging
 from copy import deepcopy
 from bs4 import BeautifulSoup
 
@@ -14,6 +15,10 @@ class Crawler:
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36"
         }
+
+        self.logger = logging.getLogger()
+        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+        logging.basicConfig(filename="manager.log", format=Log_Format)
 
     def get_post_nums(self, delete_user_list):
 
@@ -41,12 +46,17 @@ class Crawler:
 
         html_parse = BeautifulSoup(response.text, features="html.parser")
 
-        proxy_txt = html_parse.find("span", class_="proxy_txt").text
-        mobile_txt = html_parse.find("span", class_="mobile_txt").text
+        try:
+            proxy_txt = html_parse.find("span", class_="proxy_txt").text
+            mobile_txt = html_parse.find("span", class_="mobile_txt").text
 
-        if len(proxy_txt) == 0:
-            proxy_txt = "제한 없음"
-        if len(mobile_txt) == 0:
-            mobile_txt = "제한 없음"
+            if len(proxy_txt) == 0:
+                proxy_txt = "제한 없음"
+            if len(mobile_txt) == 0:
+                mobile_txt = "제한 없음"
 
-        return [proxy_txt, mobile_txt]
+            return [proxy_txt, mobile_txt]
+
+        except Exception as e:
+            self.logger.critical(e, exc_info=True)
+            return None
