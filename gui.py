@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 import threading
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -25,6 +26,10 @@ class MgallManager(QWidget):
         self.deleter = None
         self.blocker = None
         self.post_list = []
+
+        self.logger = logging.getLogger()
+        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+        logging.basicConfig(filename="manager.log", format=Log_Format)
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -242,7 +247,7 @@ class MgallManager(QWidget):
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
             except Exception as e:
-                # self.logger.critical(e, exc_info=True)
+                self.logger.critical(e, exc_info=True)
                 self.manager_status_text.setText("갤러리 접속 불가")
                 return False
 
