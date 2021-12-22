@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import threading
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -9,20 +10,22 @@ from utils import login, logout, checkauth
 from crawler import Crawler
 from blocker import Blocker
 from deleter import Deleter
-from const import BLOCK_TIME
+from const import BLOCK_TIME, DELETE_TIME
 
 
 class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.timer = threading.Timer(BLOCK_TIME, self.tryBlock_auto)
+        self.block_timer = threading.Timer(BLOCK_TIME, self.tryBlock_auto)
+        self.delete_timer = threading.Timer(DELETE_TIME, self.tryDelete_auto)
         self.gall_id = None
         self.session = None
 
         self.crawler = None
         self.deleter = None
         self.blocker = None
+        self.post_list = []
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -62,6 +65,9 @@ class MgallManager(QWidget):
         self.delete_box = QComboBox(self)
         self.delete_auto_button = QPushButton(self)
         self.delete_auto_button.setEnabled(False)
+        self.delete_message_text = QLabel(self)
+        self.delete_stop_button = QPushButton(self)
+        self.delete_stop_button.setEnabled(False)
 
         self.buttonConnect()
         self.initTexts()
@@ -109,10 +115,17 @@ class MgallManager(QWidget):
         deleterLayout.addWidget(self.delete_interval_text, 2, 2, 1, 2)
         deleterLayout.addWidget(self.delete_box, 2, 4, 1, 1)
         deleterLayout.addWidget(self.delete_auto_button, 2, 5)
+        deleterLayout.addWidget(self.delete_message_text, 3, 2, 1, 3)
+        deleterLayout.addWidget(self.delete_stop_button, 3, 5, 1, 1)
         layout.addWidget(deleterbox)
 
+        ### 추후 업데이트 ###
+        self.block_proxy_box.setEnabled(False)
+        self.block_mobile_box.setEnabled(False)
+        self.delete_box.setEnabled(False)
+
         self.setWindowTitle("MgallManager")
-        self.setFixedSize(350, 425)
+        self.setFixedSize(350, 450)
         self.setLayout(layout)
         self.show()
 
@@ -125,6 +138,9 @@ class MgallManager(QWidget):
         self.block_apply_button.clicked.connect(self.tryBlock)
         self.block_auto_button.pressed.connect(self.tryBlock_auto)
         self.block_stop_button.pressed.connect(self.tryBlock_stop)
+        self.delete_button.pressed.connect(self.tryDelete)
+        self.delete_auto_button.pressed.connect(self.tryDelete_auto)
+        self.delete_stop_button.pressed.connect(self.tryDelete_stop)
 
     def initTexts(self):
         self.id_text.setPlaceholderText("ID")
@@ -155,6 +171,7 @@ class MgallManager(QWidget):
         self.delete_interval_text.setText("삭제 주기")
         self.delete_box.addItems(["1분", "3분", "5분", "10분"])
         self.delete_auto_button.setText("자동 삭제")
+        self.delete_stop_button.setText("삭제 중지")
 
     def initStatus(self):
         self.login_status_text.setText("로그인되지 않음")
@@ -181,6 +198,7 @@ class MgallManager(QWidget):
         self.block_stop_button.setEnabled(not state)
         self.delete_button.setEnabled(state)
         self.delete_auto_button.setEnabled(state)
+        self.delete_stop_button.setEnabled(not state)
 
     def hidePassword(self):
         if self.pw_checkbox.isChecked():
@@ -205,22 +223,19 @@ class MgallManager(QWidget):
             return
 
     def tryLogout(self):
-
         if self.session is not None:
             logout(self.session)
-            self.timer.__init__(BLOCK_TIME, self.tryBlock_auto)
+            self.block_timer.__init__(BLOCK_TIME, self.tryBlock_auto)
+            self.delete_timer.__init__(DELETE_TIME, self.tryDelete_auto)
             self.session = None
             self.crawler = None
             self.blocker = None
         self.initStatus()
 
-        return
-
     def get_gall_id(self):
         self.gall_id = self.gall_id_text.text()
 
     def update_blocktime(self):
-
         if self.crawler is not None and self.blocker is not None:
             texts = self.crawler.get_blocktime()
             if texts is not None:
@@ -229,7 +244,6 @@ class MgallManager(QWidget):
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
 
     def tryCheckauth(self):
-
         if self.gall_id is None:
             self.get_gall_id()
 
@@ -260,17 +274,59 @@ class MgallManager(QWidget):
         self.block_auto_button.setEnabled(False)
         self.block_auto_button.setText("활성화됨")
         self.block_stop_button.setEnabled(True)
-        if not self.timer.is_alive():
-            self.timer.start()
+        if not self.block_timer.is_alive():
+            self.block_timer.start()
 
     def tryBlock_stop(self):
         self.block_auto_button.setEnabled(True)
         self.block_auto_button.setText("자동 차단")
         self.block_stop_button.setEnabled(False)
-        self.timer.__init__(BLOCK_TIME, self.tryBlock_auto)
+        self.block_timer.__init__(BLOCK_TIME, self.tryBlock_auto)
+
+    def get_delete_list(self):
+        user_list = self.delete_text.text().replace(" ", "").split(",")
+
+        for i in user_list:
+            if "ㅇㅇ" in i:
+                user_list.remove(i)
+
+        if self.crawler is not None:
+            self.post_list = self.crawler.get_post_nums(user_list)
+
+    def tryDelete(self):
+        self.get_delete_list()
+
+        if self.deleter is not None:
+            response = self.deleter.delete(self.post_list)
+
+            if response is None:
+                message = "삭제할 글 없음"
+            elif response is True:
+                message = "삭제 완료 : " + str(len(self.post_list)) + "개"
+            else:
+                message = "삭제 불가"
+
+            now = time.localtime()
+            current_time = " : %04d.%02d.%02d %02d:%02d:%02d" \
+                % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+            self.delete_message_text.setText(message + current_time)
+
+    def tryDelete_auto(self):
+        self.tryDelete()
+        self.delete_auto_button.setEnabled(False)
+        self.delete_auto_button.setText("활성화됨")
+        self.delete_stop_button.setEnabled(True)
+        if not self.delete_timer.is_alive():
+            self.delete_timer.start()
+
+    def tryDelete_stop(self):
+        self.delete_auto_button.setEnabled(True)
+        self.delete_auto_button.setText("자동 차단")
+        self.delete_stop_button.setEnabled(False)
+        self.delete_timer.__init__(DELETE_TIME, self.tryDelete_auto)
 
     def ExitHandler(self):
-        self.timer.cancel()
+        self.tryLogout()
         os._exit(1)
 
 
