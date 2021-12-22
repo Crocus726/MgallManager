@@ -251,6 +251,8 @@ class MgallManager(QWidget):
             except Exception as e:
                 self.logger.critical(e, exc_info=True)
                 self.manager_status_text.setText("갤러리 접속 불가")
+                self.block_proxy_status_text.setText("갤러리 접속 불가")
+                self.block_mobile_status_text.setText("갤러리 접속 불가")
                 return False
 
             return True
