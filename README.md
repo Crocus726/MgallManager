@@ -34,7 +34,7 @@ pyinstaller -F -w --icon=orange.ico main.py --add-data="orange.ico;." --name Mga
 실행파일을 다운로드하여 실행
 ```
 
-![capture1](https://user-images.githubusercontent.com/65398406/147037070-ce24511d-381a-4a17-b41c-ecc03c20b4c1.png)
+![capture1](https://user-images.githubusercontent.com/65398406/147065794-668d8f6c-96f5-49fa-9d7f-7e44e970cdca.png)
 
 1. 아이디와 비밀번호를 입력한 후 로그인한다.
 2. 접속하고자 하는 갤러리 id(영문)를 입력하여 관리자 권한을 확인한다.
