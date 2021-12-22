@@ -129,6 +129,7 @@ class MgallManager(QWidget):
         self.delete_box.setEnabled(False)
 
         self.setWindowTitle("MgallManager")
+        self.setWindowIcon(QIcon('icon/orange.ico'))
         self.setFixedSize(350, 450)
         self.setLayout(layout)
         self.show()
