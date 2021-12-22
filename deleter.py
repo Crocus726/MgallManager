@@ -15,6 +15,7 @@ class Deleter:
             "nos[]": None,
             "_GALLTYPE_": "M",
         }
+        self.post_list = None
 
     def set_post_data(self):
 
@@ -22,19 +23,20 @@ class Deleter:
         params = {"id": self.gall_id}
         self.session.get(BASE_URL, params=params)
         self.post_data["ci_t"] = self.session.cookies["ci_c"]
+        self.post_data["nos[]"] = self.post_list
 
-        crawler = Crawler(self.session, self.gall_id)
-        list = crawler.get_post_nums()
-        self.post_data["nos[]"] = list
-
-    def delete(self):
+    def delete(self, post_list):
 
         logger = logging.getLogger()
         Log_Format = "%(levelname)s %(asctime)s - %(message)s"
 
+        self.post_list = post_list
         self.set_post_data()
+
+        # self.post_data["nos[]"]
         if len(self.post_data["nos[]"]) == 0:
-            return
+
+            return None
 
         else:
             url = "https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_list"
@@ -51,3 +53,5 @@ class Deleter:
                     filename="deleter.log", level=logging.WARNING, format=Log_Format
                 )
                 logger.warning("Cannnot delete posts.")
+
+            return ("success" in response.text)
