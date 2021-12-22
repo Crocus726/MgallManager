@@ -10,6 +10,7 @@ from utils import login, logout, checkauth
 from crawler import Crawler
 from blocker import Blocker
 from deleter import Deleter
+from icons import icon_path
 from const import BLOCK_TIME, DELETE_TIME
 
 
@@ -129,7 +130,7 @@ class MgallManager(QWidget):
         self.delete_box.setEnabled(False)
 
         self.setWindowTitle("MgallManager")
-        self.setWindowIcon(QIcon('icon/orange.ico'))
+        self.setWindowIcon(QIcon(icon_path))
         self.setFixedSize(350, 450)
         self.setLayout(layout)
         self.show()
