@@ -33,7 +33,7 @@ class Blocker:
             self.post_data["ci_t"] = self.session.cookies["ci_c"]
 
         except Exception as e:
-            self.logger.critical(e, exc_info=True)
+            self.logger.critical("BLOCKER : cannot get cookie from session", exc_info=True)
 
     def block(self):
 
@@ -43,6 +43,6 @@ class Blocker:
         try:
             response = self.session.post(block_url, data=self.post_data)
         except Exception as e:
-            self.logger.critical(e, exc_info=True)
+            self.logger.critical("BLOCKER : cannnot update block settings", exc_info=True)
 
         return "success" in response.text

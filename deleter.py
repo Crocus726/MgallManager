@@ -41,9 +41,9 @@ class Deleter:
             response = self.session.post(url, data=self.post_data)
 
             if "success" in response.text:
-                self.logger.info("Deleted Selected Postings " + str(self.post_data["nos[]"]))
+                self.logger.info("DELETER : deleted selected postings " + str(self.post_data["nos[]"]), exc_info=True)
 
             else:
-                self.logger.warning("Cannnot delete posts.")
+                self.logger.warning("DELETER : cannnot delete posts", exc_info=True)
 
             return ("success" in response.text)
