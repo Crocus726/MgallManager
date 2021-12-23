@@ -8,7 +8,7 @@ class Crawler:
 
         self.session = deepcopy(session)
         self.gall_id = gall_id
-        self.BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
+        self.base_url = "https://gall.dcinside.com/mgallery/board/lists/"
         self.management_url = "https://gall.dcinside.com/mgallery/management/gallery"
         self.params = {"id": self.gall_id}
         self.headers = {
@@ -19,7 +19,7 @@ class Crawler:
 
     def get_post_nums(self, delete_user_list):
 
-        response = requests.get(self.BASE_URL, params=self.params, headers=self.headers)
+        response = requests.get(self.base_url, params=self.params, headers=self.headers)
         html_data = BeautifulSoup(response.content, "html.parser")
         post_num_list = []
 

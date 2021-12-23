@@ -6,6 +6,8 @@ class Deleter:
     def __init__(self, session: requests.Session, gall_id):
 
         self.session = deepcopy(session)
+        self.base_url = "https://gall.dcinside.com/mgallery/board/lists/"
+        self.delete_url = "https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_list"
         self.gall_id = gall_id
         self.post_data = {
             "ci_t": None,
@@ -19,9 +21,8 @@ class Deleter:
 
     def set_post_data(self):
 
-        BASE_URL = "https://gall.dcinside.com/mgallery/board/lists/"
         params = {"id": self.gall_id}
-        self.session.get(BASE_URL, params=params)
+        self.session.get(self.base_url, params=params)
         self.post_data["ci_t"] = self.session.cookies["ci_c"]
         self.post_data["nos[]"] = self.post_list
 
@@ -34,8 +35,7 @@ class Deleter:
             return None
 
         else:
-            url = "https://gall.dcinside.com/ajax/minor_manager_board_ajax/delete_list"
-            response = self.session.post(url, data=self.post_data)
+            response = self.session.post(self.delete_url, data=self.post_data)
 
             if "success" in response.text:
                 self.logger.info("DELETER : deleted selected postings " + str(self.post_data["nos[]"]))

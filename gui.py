@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 import threading
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, \
@@ -11,15 +12,17 @@ from crawler import Crawler
 from blocker import Blocker
 from deleter import Deleter
 from icons import icon_path
-from const import BLOCK_TIME, DELETE_TIME
+from const import ONEHOUR, ONEMINUTE, \
+    PROXY_TIME_DICT, MOBILE_TIME_DICT, \
+    BLOCK_UPDATE_TIME_DICT, DELETE_UPDATE_TIME_DICT
 
 
 class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.block_timer = threading.Timer(BLOCK_TIME, self.tryBlock_auto)
-        self.delete_timer = threading.Timer(DELETE_TIME, self.tryDelete_auto)
+        self.block_timer = threading.Timer(ONEHOUR, self.tryBlock)
+        self.delete_timer = threading.Timer(ONEMINUTE, self.tryDelete)
         self.gall_id = None
         self.session = None
 
@@ -124,11 +127,6 @@ class MgallManager(QWidget):
         deleterLayout.addWidget(self.delete_message_text, 3, 2, 1, 3)
         deleterLayout.addWidget(self.delete_stop_button, 3, 5, 1, 1)
         layout.addWidget(deleterbox)
-
-        # 추후 업데이트
-        self.block_proxy_box.setEnabled(False)
-        self.block_mobile_box.setEnabled(False)
-        self.delete_box.setEnabled(False)
 
         self.setWindowTitle("MgallManager")
         self.setWindowIcon(QIcon(icon_path))
@@ -235,8 +233,8 @@ class MgallManager(QWidget):
     def tryLogout(self):
         if self.session is not None:
             logout(self.session)
-            self.block_timer.__init__(BLOCK_TIME, self.tryBlock_auto)
-            self.delete_timer.__init__(DELETE_TIME, self.tryDelete_auto)
+            self.block_timer.__init__(ONEHOUR, self.tryBlock)
+            self.delete_timer.__init__(ONEMINUTE, self.tryDelete)
             self.session = None
             self.crawler = None
             self.blocker = None
@@ -285,8 +283,13 @@ class MgallManager(QWidget):
             self.manager_status_text.setText("로그인되지 않음")
 
     def tryBlock(self):
+        proxy_time = self.block_proxy_box.currentText()
+        proxy_time = PROXY_TIME_DICT[proxy_time]
+        mobile_time = self.block_mobile_box.currentText()
+        mobile_time = MOBILE_TIME_DICT[mobile_time]
+
         if self.blocker is not None:
-            self.blocker.block()
+            self.blocker.block(proxy_time, mobile_time)
             self.update_blocktime()
 
     def tryBlock_auto(self):
@@ -294,53 +297,79 @@ class MgallManager(QWidget):
         self.block_auto_button.setEnabled(False)
         self.block_auto_button.setText("활성화됨")
         self.block_stop_button.setEnabled(True)
-        if not self.block_timer.is_alive():
-            self.block_timer.start()
+
+        proxy_time = self.block_proxy_box.currentText()
+        proxy_time = BLOCK_UPDATE_TIME_DICT[proxy_time]
+        mobile_time = self.block_mobile_box.currentText()
+        mobile_time = BLOCK_UPDATE_TIME_DICT[mobile_time]
+
+        if proxy_time and mobile_time:
+            block_time = min(proxy_time, mobile_time)
+        else:
+            block_time = proxy_time or mobile_time
+
+        if block_time:
+            if not self.block_timer.is_alive():
+                self.block_timer = threading.Timer(block_time, self.tryDelete)
+                self.block_timer.start()
+        else:
+            self.tryBlock_stop()
 
     def tryBlock_stop(self):
         self.block_auto_button.setEnabled(True)
         self.block_auto_button.setText("자동 차단")
         self.block_stop_button.setEnabled(False)
-        self.block_timer.__init__(BLOCK_TIME, self.tryBlock_auto)
+        self.block_timer.__init__(ONEHOUR, self.tryBlock)
 
     def get_delete_list(self):
         user_list = self.delete_text.text().replace(" ", "").split(",")
 
+        # 기본 유동닉은 삭제에서 배제
         for i in user_list:
             if "ㅇㅇ" in i:
                 user_list.remove(i)
 
-        if self.crawler is not None:
+        try:
             self.post_list = self.crawler.get_post_nums(user_list)
+        except Exception:
+            pass
 
     def tryDelete(self):
         self.get_delete_list()
 
-        if self.deleter is not None:
+        try:
             response = self.deleter.delete(self.post_list)
-
             if response is None:
                 message = "삭제할 글 없음 : "
             elif response is True:
                 message = "삭제 완료 : " + str(len(self.post_list)) + "개 : "
             else:
                 message = "삭제 불가 : "
-
             self.delete_message_text.setText(message + get_cur_time())
+        except Exception:
+            print("???")
+            pass
 
     def tryDelete_auto(self):
         self.tryDelete()
         self.delete_auto_button.setEnabled(False)
         self.delete_auto_button.setText("활성화됨")
         self.delete_stop_button.setEnabled(True)
-        if not self.delete_timer.is_alive():
-            self.delete_timer.start()
+
+        delete_time = self.delete_box.currentText()
+        delete_time = DELETE_UPDATE_TIME_DICT[delete_time]
+        # self.delete_timer = threading.Timer(delete_time, self.tryDelete)
+        # self.delete_timer.start()
+
+        while True:
+            self.tryDelete()
+            time.sleep(delete_time)
 
     def tryDelete_stop(self):
         self.delete_auto_button.setEnabled(True)
         self.delete_auto_button.setText("자동 차단")
         self.delete_stop_button.setEnabled(False)
-        self.delete_timer.__init__(DELETE_TIME, self.tryDelete_auto)
+        self.delete_timer.__init__(ONEMINUTE, self.tryDelete)
 
     def ExitHandler(self):
         self.tryLogout()
