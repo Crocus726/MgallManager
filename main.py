@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication
 
 from gui import MgallManager
 
+
 def main():
     app = QApplication(sys.argv)
     ex = MgallManager()

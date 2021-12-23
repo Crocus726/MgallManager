@@ -1,12 +1,11 @@
 import os
-import time
 import logging
 import threading
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from utils import login, logout, checkauth
+from utils import login, logout, checkauth, get_cur_date, get_cur_time
 from crawler import Crawler
 from blocker import Blocker
 from deleter import Deleter
@@ -29,8 +28,9 @@ class MgallManager(QWidget):
         self.post_list = []
 
         self.logger = logging.getLogger()
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-        logging.basicConfig(filename="manager.log", format=Log_Format)
+        LOG_FILENAME = get_cur_date() + ".log"
+        Log_Format = "%(levelname)s %(asctime)s %(message)s"
+        logging.basicConfig(filename=LOG_FILENAME, format=Log_Format, level="INFO")
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -124,7 +124,7 @@ class MgallManager(QWidget):
         deleterLayout.addWidget(self.delete_stop_button, 3, 5, 1, 1)
         layout.addWidget(deleterbox)
 
-        ### 추후 업데이트 ###
+        # 추후 업데이트
         self.block_proxy_box.setEnabled(False)
         self.block_mobile_box.setEnabled(False)
         self.delete_box.setEnabled(False)
@@ -252,7 +252,6 @@ class MgallManager(QWidget):
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
             except Exception as e:
-                self.logger.critical(e, exc_info=True)
                 self.manager_status_text.setText("갤러리 접속 불가")
                 self.block_proxy_status_text.setText("갤러리 접속 불가")
                 self.block_mobile_status_text.setText("갤러리 접속 불가")
@@ -269,8 +268,11 @@ class MgallManager(QWidget):
             if status:
                 self.manager_status_text.setText("관리자 권한 확인됨")
                 self.crawler = Crawler(self.session, self.gall_id)
+                self.crawler.logger = self.logger
                 self.blocker = Blocker(self.session, self.gall_id)
+                self.blocker.logger = self.logger
                 self.deleter = Deleter(self.session, self.gall_id)
+                self.deleter.logger = self.logger
                 if self.update_blocktime():
                     self.setManagebuttons(True)
 
@@ -317,16 +319,13 @@ class MgallManager(QWidget):
             response = self.deleter.delete(self.post_list)
 
             if response is None:
-                message = "삭제할 글 없음"
+                message = "삭제할 글 없음 : "
             elif response is True:
-                message = "삭제 완료 : " + str(len(self.post_list)) + "개"
+                message = "삭제 완료 : " + str(len(self.post_list)) + "개 : "
             else:
-                message = "삭제 불가"
+                message = "삭제 불가 : "
 
-            now = time.localtime()
-            current_time = " : %04d.%02d.%02d %02d:%02d:%02d" \
-                % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-            self.delete_message_text.setText(message + current_time)
+            self.delete_message_text.setText(message + get_cur_time())
 
     def tryDelete_auto(self):
         self.tryDelete()

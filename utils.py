@@ -1,9 +1,9 @@
+import time
 import requests
 from bs4 import BeautifulSoup
 
 
 def login(user_id, pw):
-
     url = "https://dcid.dcinside.com/join/member_check.php"
 
     session = requests.session()
@@ -38,11 +38,8 @@ def login(user_id, pw):
 def logout(session: requests.Session):
     session.close()
 
-    return
-
 
 def checkauth(session: requests.Session, gall_id):
-
     url = "https://gall.dcinside.com/mgallery/management"
     params = {"id": gall_id}
 
@@ -51,3 +48,19 @@ def checkauth(session: requests.Session, gall_id):
         return False
 
     return not ("replace" in response.text)
+
+
+def get_cur_date():
+    now = time.localtime()
+    current_date = "%04d-%02d-%02d" \
+        % (now.tm_year, now.tm_mon, now.tm_mday)
+
+    return current_date
+
+
+def get_cur_time():
+    now = time.localtime()
+    current_time = "%04d-%02d-%02d %02d:%02d:%02d" \
+        % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+
+    return current_time

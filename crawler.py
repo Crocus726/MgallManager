@@ -1,5 +1,4 @@
 import requests
-import logging
 from copy import deepcopy
 from bs4 import BeautifulSoup
 
@@ -16,9 +15,7 @@ class Crawler:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36"
         }
 
-        self.logger = logging.getLogger()
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-        logging.basicConfig(filename="manager.log", format=Log_Format)
+        self.logger = None
 
     def get_post_nums(self, delete_user_list):
 
@@ -35,9 +32,10 @@ class Crawler:
 
                 if any(i in nick for i in delete_user_list):
                     post_num_list.append(int(post_num))
+            self.logger.info("CRAWLER : got post nums from server")
 
         except Exception as e:
-            self.logger.critical("CRAWLER : cannot get post nums from server", exc_info=True)
+            self.logger.critical("CRAWLER : cannot get post nums from server")
 
         return post_num_list
 
@@ -58,8 +56,9 @@ class Crawler:
             if len(mobile_txt) == 0:
                 mobile_txt = "제한 없음"
 
+            self.logger.info("CRAWLER : got block time from server")
             return [proxy_txt, mobile_txt]
 
         except Exception as e:
-            self.logger.critical("CRAWLER : cannot load block time info from server", exc_info=True)
+            self.logger.critical("CRAWLER : cannot get block time info from server")
             return None

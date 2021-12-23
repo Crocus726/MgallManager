@@ -1,6 +1,5 @@
 from copy import deepcopy
 import requests
-import logging
 
 
 class Blocker:
@@ -19,9 +18,7 @@ class Blocker:
             "img_block_use": -1,
             "img_block_time": None,
         }
-        self.logger = logging.getLogger()
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-        logging.basicConfig(filename="manager.log", format=Log_Format)
+        self.logger = None
 
     def set_post_data(self):
 
@@ -33,7 +30,7 @@ class Blocker:
             self.post_data["ci_t"] = self.session.cookies["ci_c"]
 
         except Exception as e:
-            self.logger.critical("BLOCKER : cannot get cookie from session", exc_info=True)
+            self.logger.critical("BLOCKER : cannot get cookie from session")
 
     def block(self):
 
@@ -42,7 +39,9 @@ class Blocker:
 
         try:
             response = self.session.post(block_url, data=self.post_data)
+            self.logger.info("BLOCKER : updated block settings")
+
         except Exception as e:
-            self.logger.critical("BLOCKER : cannnot update block settings", exc_info=True)
+            self.logger.critical("BLOCKER : cannnot update block settings")
 
         return "success" in response.text

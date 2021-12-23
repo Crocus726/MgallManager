@@ -1,6 +1,5 @@
 from copy import deepcopy
 import requests
-import logging
 
 
 class Deleter:
@@ -16,9 +15,7 @@ class Deleter:
         }
         self.post_list = None
 
-        self.logger = logging.getLogger()
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-        logging.basicConfig(filename="manager.log", format=Log_Format)
+        self.logger = None
 
     def set_post_data(self):
 
@@ -41,9 +38,9 @@ class Deleter:
             response = self.session.post(url, data=self.post_data)
 
             if "success" in response.text:
-                self.logger.info("DELETER : deleted selected postings " + str(self.post_data["nos[]"]), exc_info=True)
+                self.logger.info("DELETER : deleted selected postings " + str(self.post_data["nos[]"]))
 
             else:
-                self.logger.warning("DELETER : cannnot delete posts", exc_info=True)
+                self.logger.warning("DELETER : cannnot delete posts")
 
             return ("success" in response.text)
