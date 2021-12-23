@@ -1,9 +1,10 @@
 import os
 import logging
 import threading
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, \
+    QLineEdit, QCheckBox, QPushButton, QRadioButton, QComboBox, \
+    QGroupBox, QGridLayout
+from PyQt5.QtGui import QIcon
 
 from utils import login, logout, checkauth, get_cur_date, get_cur_time
 from crawler import Crawler
@@ -251,7 +252,7 @@ class MgallManager(QWidget):
                 proxy_text, mobile_text = texts
                 self.block_proxy_status_text.setText("VPN : " + proxy_text)
                 self.block_mobile_status_text.setText("통신사 IP : " + mobile_text)
-            except Exception as e:
+            except Exception:
                 self.manager_status_text.setText("갤러리 접속 불가")
                 self.block_proxy_status_text.setText("갤러리 접속 불가")
                 self.block_mobile_status_text.setText("갤러리 접속 불가")

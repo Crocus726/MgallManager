@@ -34,7 +34,7 @@ class Crawler:
                     post_num_list.append(int(post_num))
             self.logger.info("CRAWLER : got post nums from server")
 
-        except Exception as e:
+        except Exception:
             self.logger.critical("CRAWLER : cannot get post nums from server")
 
         return post_num_list
@@ -59,6 +59,6 @@ class Crawler:
             self.logger.info("CRAWLER : got block time from server")
             return [proxy_txt, mobile_txt]
 
-        except Exception as e:
+        except Exception:
             self.logger.critical("CRAWLER : cannot get block time info from server")
             return None
