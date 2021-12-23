@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, \
     QLineEdit, QCheckBox, QPushButton, QRadioButton, QComboBox, \
     QGroupBox, QGridLayout
 from PyQt5.QtGui import QIcon
+# from PyQt5.QtCore import QThread
 
 from utils import login, logout, checkauth, get_cur_date, get_cur_time
 from crawler import Crawler
