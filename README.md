@@ -45,6 +45,7 @@ pyinstaller -F -w --icon=orange.ico main.py --add-data="orange.ico;." --name Mga
 ![capture4](https://user-images.githubusercontent.com/65398406/147081651-c215dd99-7ca3-4ad4-9a0e-517ee2ddbc24.png)
 
 3. 현재 해당 갤러리의 VPN  및 통신사 IP 차단 상태를 확인합니다.
+- 선택 박스에서 적용할 차단 시간을 선택합니다.
 - '적용'을 눌러 고정된 시간만큼 한 번 차단을 활성화합니다.
 - '자동 차단'을 눌러 일정 주기마다 차단을 갱신합니다.
 - '차단 중지'를 눌러 차단을 비활성화할 수 있습니다.
@@ -55,4 +56,4 @@ pyinstaller -F -w --icon=orange.ico main.py --add-data="orange.ico;." --name Mga
 - 삭제하고자 하는 닉네임 리스트를 ","로 나누어서 입력합니다.
 - '글 삭제'를 눌러 해당 닉네임의 사용자 글을 한 번 삭제합니다.
 - '자동 삭제'를 눌러 일정 주기마다 사용자의 글을 자동 삭제합니다.
-- 기본 유동 닉네임 "ㅇㅇ"은 삭제하지 못하도록 고정했습니다.
+- 기본 유동 닉네임 "ㅇㅇ"은 삭제하지 못하도록 고정되어 있습니다.
