@@ -1,6 +1,3 @@
-ONEHOUR = 3540
-ONEMINUTE = 60
-
 BLOCK_UPDATE_TIME_DICT = {"48시간": 172000, "24시간": 86300, "60분": 3540, "30분": 1740, "차단 해제": 0}
 DELETE_UPDATE_TIME_DICT = {"10분": 600, "5분": 300, "3분": 180, "1분": 60}
 

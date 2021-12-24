@@ -1,20 +1,18 @@
 import os
-import time
 import logging
-import threading
+
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, \
     QLineEdit, QCheckBox, QPushButton, QRadioButton, QComboBox, \
     QGroupBox, QGridLayout
 from PyQt5.QtGui import QIcon
-# from PyQt5.QtCore import QThread
 
-from utils import login, logout, checkauth, get_cur_date, get_cur_time
 from crawler import Crawler
 from blocker import Blocker
 from deleter import Deleter
+from thread import MgallThread
+from utils import login, logout, checkauth, get_cur_date, get_cur_time
 from icons import icon_path
-from const import ONEHOUR, ONEMINUTE, \
-    PROXY_TIME_DICT, MOBILE_TIME_DICT, \
+from const import PROXY_TIME_DICT, MOBILE_TIME_DICT, \
     BLOCK_UPDATE_TIME_DICT, DELETE_UPDATE_TIME_DICT
 
 
@@ -22,8 +20,6 @@ class MgallManager(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.block_timer = threading.Timer(ONEHOUR, self.tryBlock)
-        self.delete_timer = threading.Timer(ONEMINUTE, self.tryDelete)
         self.gall_id = None
         self.session = None
 
@@ -234,8 +230,6 @@ class MgallManager(QWidget):
     def tryLogout(self):
         if self.session is not None:
             logout(self.session)
-            self.block_timer.__init__(ONEHOUR, self.tryBlock)
-            self.delete_timer.__init__(ONEMINUTE, self.tryDelete)
             self.session = None
             self.crawler = None
             self.blocker = None
@@ -294,7 +288,6 @@ class MgallManager(QWidget):
             self.update_blocktime()
 
     def tryBlock_auto(self):
-        self.tryBlock()
         self.block_auto_button.setEnabled(False)
         self.block_auto_button.setText("활성화됨")
         self.block_stop_button.setEnabled(True)
@@ -310,9 +303,8 @@ class MgallManager(QWidget):
             block_time = proxy_time or mobile_time
 
         if block_time:
-            if not self.block_timer.is_alive():
-                self.block_timer = threading.Timer(block_time, self.tryDelete)
-                self.block_timer.start()
+            self.block_thread = MgallThread(self, block_time)
+            self.block_thread.block()
         else:
             self.tryBlock_stop()
 
@@ -320,7 +312,7 @@ class MgallManager(QWidget):
         self.block_auto_button.setEnabled(True)
         self.block_auto_button.setText("자동 차단")
         self.block_stop_button.setEnabled(False)
-        self.block_timer.__init__(ONEHOUR, self.tryBlock)
+        self.block_thread.stop()
 
     def get_delete_list(self):
         user_list = self.delete_text.text().replace(" ", "").split(",")
@@ -337,7 +329,6 @@ class MgallManager(QWidget):
 
     def tryDelete(self):
         self.get_delete_list()
-
         try:
             response = self.deleter.delete(self.post_list)
             if response is None:
@@ -348,29 +339,24 @@ class MgallManager(QWidget):
                 message = "삭제 불가 : "
             self.delete_message_text.setText(message + get_cur_time())
         except Exception:
-            print("???")
             pass
 
     def tryDelete_auto(self):
-        self.tryDelete()
         self.delete_auto_button.setEnabled(False)
         self.delete_auto_button.setText("활성화됨")
         self.delete_stop_button.setEnabled(True)
 
         delete_time = self.delete_box.currentText()
         delete_time = DELETE_UPDATE_TIME_DICT[delete_time]
-        # self.delete_timer = threading.Timer(delete_time, self.tryDelete)
-        # self.delete_timer.start()
-
-        while True:
-            self.tryDelete()
-            time.sleep(delete_time)
+        self.delete_thread = MgallThread(self, delete_time)
+        self.delete_thread.delete()
 
     def tryDelete_stop(self):
         self.delete_auto_button.setEnabled(True)
-        self.delete_auto_button.setText("자동 차단")
+        self.delete_auto_button.setText("자동 삭제")
         self.delete_stop_button.setEnabled(False)
-        self.delete_timer.__init__(ONEMINUTE, self.tryDelete)
+        self.delete_thread.stop()
+        self.delete_message_text.setText("삭제 중지")
 
     def ExitHandler(self):
         self.tryLogout()
