@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+  push:
+    paths:
+      - "**"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        path: [
+          ".",
+        ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Lint with flake8
+        run: |
+          pip install -U pip flake8
+          cd ${{ matrix.path }}
+          flake8
