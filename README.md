@@ -32,6 +32,8 @@ pyinstaller -F -w --icon=orange.ico main.py --add-data="orange.ico;." --name Mga
 ```
 또는 [실행 파일 다운로드](https://github.com/Gloriel621/MgallManager/releases)
 
+# 사용 방법
+
 ![capture1](https://user-images.githubusercontent.com/65398406/147065794-668d8f6c-96f5-49fa-9d7f-7e44e970cdca.png)
 
 1. 아이디와 비밀번호를 입력한 후 로그인합니다.
